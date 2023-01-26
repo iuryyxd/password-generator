@@ -17,6 +17,7 @@ export default function App() {
   const [uppercase, setUppercase] = useState<boolean>(false);
   const [numbers, setNumbers] = useState<boolean>(false);
   const [symbols, setSymbols] = useState<boolean>(false);
+  const [score, setScore] = useState<number | null>(null);
 
   const checkboxesFunctions = {
     setUppercase: setUppercase,
@@ -38,12 +39,15 @@ export default function App() {
   }
 
   useEffect(() => {
-    password && navigator.clipboard.writeText(password);
+    if (password) {
+      navigator.clipboard.writeText(password);
+      setScore(checkPassword(password));
+    }
   }, [password]);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center py-16">
-      <div className="w-[540px] flex flex-col">
+      <div className="max-w-[540px] w-full flex flex-col px-6">
         <h1 className="text-gray text-2xl mb-8 text-center">
           Password generator
         </h1>
@@ -83,14 +87,14 @@ export default function App() {
             ))}
           </div>
 
-          <div className="w-full p-6 flex items-center justify-between bg-gray-very-dark mb-8">
+          <div className="w-full p-6 flex items-center justify-between bg-gray-very-dark mb-8 vsm:flex-col">
             <h4 className="text-gray text-xl">STRENGTH</h4>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 sm:flex-col">
               {!password ? (
                 ""
               ) : (
                 <>
-                  <p className="text-2xl text-white">
+                  <p className="text-2xl text-white sm:text-base">
                     {strengths[checkPassword(password)].title}
                   </p>
                   <div className="flex items-center gap-2">
