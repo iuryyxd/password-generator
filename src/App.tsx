@@ -9,6 +9,8 @@ import { CheckboxesList } from "./utils/Checkboxes";
 import { generate } from "generate-password-browser";
 import { strengths } from "./utils/strengths";
 import { checkPassword } from "./utils/checkPasswordStrength";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   const [length, setLength] = useState<number>(5);
@@ -27,6 +29,16 @@ export default function App() {
   };
 
   function generatePassword() {
+    toast.success("Password generated!", {
+      position: "top-right",
+      autoClose: 800,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
     setPassword(
       generate({
         length,
@@ -39,11 +51,35 @@ export default function App() {
   }
 
   useEffect(() => {
+    password && setScore(checkPassword(password));
+  }, [password]);
+
+  const handleCopyPassword = () => {
     if (password) {
       navigator.clipboard.writeText(password);
-      setScore(checkPassword(password));
+      toast.success("Copied!", {
+        position: "top-right",
+        autoClose: 800,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } else if (!password) {
+      toast.error("Please, generate a password!", {
+        position: "top-right",
+        autoClose: 800,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     }
-  }, [password]);
+  };
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center py-16">
@@ -60,9 +96,11 @@ export default function App() {
           >
             {password ? password : "Generate one..."}
           </h2>
+
           <IoMdCopy
             size={28}
             className="text-neon-green cursor-pointer transition-all hover:text-white"
+            onClick={handleCopyPassword}
           />
         </div>
 
@@ -101,31 +139,31 @@ export default function App() {
                     <div
                       className={clsx("w-2.5 h-7", {
                         ["border-2 border-white"]: !password,
-                        ["bg-red"]: checkPassword(password) <= 1,
-                        ["bg-orange"]: checkPassword(password) === 2,
-                        ["bg-yellow"]: checkPassword(password) === 3,
-                        ["bg-neon-green"]: checkPassword(password) === 4,
+                        ["bg-red"]: score && score <= 1,
+                        ["bg-orange"]: score && score === 2,
+                        ["bg-yellow"]: score && score === 3,
+                        ["bg-neon-green"]: score && score === 4,
                       })}
                     />
                     <div
                       className={clsx("w-2.5 h-7", {
-                        ["border-2 border-white"]: checkPassword(password) <= 1,
-                        ["bg-orange"]: checkPassword(password) === 2,
-                        ["bg-yellow"]: checkPassword(password) === 3,
-                        ["bg-neon-green"]: checkPassword(password) === 4,
+                        ["border-2 border-white"]: score && score <= 1,
+                        ["bg-orange"]: score && score === 2,
+                        ["bg-yellow"]: score && score === 3,
+                        ["bg-neon-green"]: score && score === 4,
                       })}
                     />
                     <div
                       className={clsx("w-2.5 h-7", {
-                        ["border-2 border-white"]: checkPassword(password) < 3,
-                        ["bg-yellow"]: checkPassword(password) === 3,
-                        ["bg-neon-green"]: checkPassword(password) === 4,
+                        ["border-2 border-white"]: score && score < 3,
+                        ["bg-yellow"]: score && score === 3,
+                        ["bg-neon-green"]: score && score === 4,
                       })}
                     />
                     <div
                       className={clsx("w-2.5 h-7", {
-                        ["border-2 border-white"]: checkPassword(password) < 4,
-                        ["bg-neon-green"]: checkPassword(password) === 4,
+                        ["border-2 border-white"]: score && score < 4,
+                        ["bg-neon-green"]: score && score === 4,
                       })}
                     />
                   </div>
@@ -135,13 +173,49 @@ export default function App() {
           </div>
 
           <button
-            className="w-full p-6 flex items-center justify-center bg-neon-green gap-2 text-lg transition-all hover:opacity-80 cursor-pointer"
+            className={clsx(
+              "w-full p-6 flex items-center justify-center bg-neon-green gap-2 text-lg transition-all cursor-pointer",
+              {
+                ["opacity-50"]: [lowercase, uppercase, numbers, symbols].every(
+                  (item) => !item
+                ),
+                ["hover:outline-1 hover:outline hover:text-white hover:outline-neon-green hover:bg-opacity-0"]:
+                  [lowercase, uppercase, numbers, symbols].some((item) => item),
+              }
+            )}
             onClick={generatePassword}
+            disabled={[lowercase, uppercase, numbers, symbols].every(
+              (item) => !item
+            )}
           >
-            GENERATE <FiArrowRight size={24} />
+            GENERATE{" "}
+            <FiArrowRight
+              size={24}
+              className={clsx("", {
+                ["hover:text-white"]: [
+                  lowercase,
+                  uppercase,
+                  numbers,
+                  symbols,
+                ].some((item) => item),
+              })}
+            />
           </button>
         </div>
       </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={800}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }
